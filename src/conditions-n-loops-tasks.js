@@ -22,7 +22,10 @@
  *  -5 => false
  */
 function isPositive(number) {
-  return !(number < 0);
+  if (number >= 0) {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -93,12 +96,27 @@ function canQueenCaptureKing(queen, king) {
  *  3, 0, 3   => false
  */
 function isIsoscelesTriangle(a, b, c) {
-  if (!(a > 0 && b > 0 && c > 0)) {
+  if (a === 0 || b === 0 || c === 0) {
     return false;
   }
-  return (
-    (a === b && a + b > c) || (b === c && c + b > a) || (c === a && a + c > b)
-  );
+  if (a === b) {
+    if (a + b > c) {
+      return true;
+    }
+    return false;
+  }
+  if (a === c) {
+    if (a + c > b) {
+      return true;
+    }
+    return false;
+  }
+  if (c === b) {
+    if (c + b > a) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -159,30 +177,55 @@ function convertToRomanNumerals(num) {
  *  '1950.2'  => 'one nine five zero point two'
  */
 function convertNumberToString(numberStr) {
-  const digitToWord = {
-    0: 'zero',
-    1: 'one',
-    2: 'two',
-    3: 'three',
-    4: 'four',
-    5: 'five',
-    6: 'six',
-    7: 'seven',
-    8: 'eight',
-    9: 'nine',
-    '-': 'minus',
-    '.': 'point',
-    ',': 'point',
-  };
-
-  function convertToWord(char) {
-    return digitToWord[char] || char; // If the character is not in digitToWord, return it as is
+  function digitName(numStr) {
+    switch (numStr) {
+      case '1': {
+        return 'one';
+      }
+      case '2': {
+        return 'two';
+      }
+      case '3': {
+        return 'three';
+      }
+      case '4': {
+        return 'four';
+      }
+      case '5': {
+        return 'five';
+      }
+      case '6': {
+        return 'six';
+      }
+      case '7': {
+        return 'seven';
+      }
+      case '8': {
+        return 'eight';
+      }
+      case '9': {
+        return 'nine';
+      }
+      case '0': {
+        return 'zero';
+      }
+      case '-': {
+        return 'minus';
+      }
+      case '.': {
+        return 'point';
+      }
+      case ',': {
+        return 'point';
+      }
+      default: {
+        return '';
+      }
+    }
   }
-
   let result = '';
   for (let i = 0; i < numberStr.length; i += 1) {
-    result +=
-      convertToWord(numberStr[i]) + (i < numberStr.length - 1 ? ' ' : ''); // Add space between words
+    result += (result ? ' ' : '') + digitName(numberStr[i]);
   }
   return result;
 }
@@ -248,12 +291,13 @@ function getIndexOf(str, letter) {
  *  12345, 6    => false
  */
 function isContainNumber(num, digit) {
-  let temp = num;
-  while (temp > 0) {
-    if (temp % 10 === digit) {
+  let result = num;
+  while (result > 0) {
+    const rest = result % 10;
+    if (rest === digit) {
       return true;
     }
-    temp = Math.round(temp / 10);
+    result = Math.trunc(result / 10);
   }
   return false;
 }
@@ -272,17 +316,17 @@ function isContainNumber(num, digit) {
  *  [1, 2, 3, 4, 5] => -1   => no balance element
  */
 function getBalanceIndex(arr) {
-  let total = 0;
-  let left = 0;
-  for (let i = 0; i < arr.length; i += 1) {
-    total += arr[i];
+  let sumRight = 0;
+  for (let i = 1; i < arr.length; i += 1) {
+    sumRight += arr[i];
   }
-  for (let i = 0; i < arr.length; i += 1) {
-    const right = total - arr[i] - left;
-    if (left === right) {
+  let sumLeft = arr[0];
+  for (let i = 1; i < arr.length; i += 1) {
+    sumRight -= arr[i];
+    if (sumLeft === sumRight) {
       return i;
     }
-    left += arr[i];
+    sumLeft += arr[i];
   }
   return -1;
 }
@@ -323,34 +367,30 @@ function getSpiralMatrix(size) {
   let right = size - 1;
 
   while (top <= bottom && left <= right) {
-    // Fill top row
     for (let i = left; i <= right; i += 1) {
       matrix[top][i] = num;
-      num += 1; // Separate increment
+      num += 1;
     }
     top += 1;
 
-    // Fill right column
     for (let i = top; i <= bottom; i += 1) {
       matrix[i][right] = num;
-      num += 1; // Separate increment
+      num += 1;
     }
     right -= 1;
 
     if (top <= bottom) {
-      // Fill bottom row
       for (let i = right; i >= left; i -= 1) {
         matrix[bottom][i] = num;
-        num += 1; // Separate increment
+        num += 1;
       }
       bottom -= 1;
     }
 
     if (left <= right) {
-      // Fill left column
       for (let i = bottom; i >= top; i -= 1) {
         matrix[i][left] = num;
-        num += 1; // Separate increment
+        num += 1;
       }
       left += 1;
     }
@@ -375,24 +415,18 @@ function getSpiralMatrix(size) {
  *  ]                 ]
  */
 function rotateMatrix(matrix) {
-  const n = matrix.length;
-  const initialMatrix = matrix;
-  const rotatedMatrix = [];
-
-  for (let i = 0; i < n; i += 1) {
-    rotatedMatrix[i] = [];
-    for (let j = 0; j < n; j += 1) {
-      rotatedMatrix[i][j] = matrix[n - 1 - j][i];
+  const matr = matrix;
+  const matrLength = matr.length - 1;
+  const numberCircle = Math.floor(matr.length / 2);
+  for (let i = 0; i < numberCircle; i += 1) {
+    for (let j = i; j < matrLength - i; j += 1) {
+      const temp = matr[i][j];
+      matr[i][j] = matr[matrLength - j][i];
+      matr[matrLength - j][i] = matr[matrLength - i][matrLength - j];
+      matr[matrLength - i][matrLength - j] = matr[j][matrLength - i];
+      matr[j][matrLength - i] = temp;
     }
   }
-
-  for (let i = 0; i < n; i += 1) {
-    for (let j = 0; j < n; j += 1) {
-      initialMatrix[i][j] = rotatedMatrix[i][j];
-    }
-  }
-
-  return initialMatrix;
 }
 
 /**
