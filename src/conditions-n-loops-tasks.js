@@ -22,7 +22,7 @@
  *  -5 => false
  */
 function isPositive(number) {
-  return number > 0;
+  return !(number < 0);
 }
 
 /**
@@ -67,19 +67,11 @@ function getMaxNumber(a, b, c) {
  * {x: 1, y: 1}, {x: 2, y: 8} => false
  */
 function canQueenCaptureKing(queen, king) {
-  if (queen.x === king.x) {
-    return true;
-  }
-
-  if (queen.y === king.y) {
-    return true;
-  }
-
-  if (Math.abs(queen.x - king.x) === Math.abs(queen.y - king.y)) {
-    return true;
-  }
-
-  return false;
+  return (
+    queen.x === king.x ||
+    queen.y === king.y ||
+    Math.abs(queen.x - king.x) === Math.abs(queen.y - king.y)
+  );
 }
 
 /**
@@ -101,19 +93,12 @@ function canQueenCaptureKing(queen, king) {
  *  3, 0, 3   => false
  */
 function isIsoscelesTriangle(a, b, c) {
-  if (a <= 0 || b <= 0 || c <= 0) {
+  if (!(a > 0 && b > 0 && c > 0)) {
     return false;
   }
-
-  if (a + b <= c || a + c <= b || b + c <= a) {
-    return false;
-  }
-
-  if (a === b || b === c || a === c) {
-    return true;
-  }
-
-  return false;
+  return (
+    (a === b && a + b > c) || (b === c && c + b > a) || (c === a && a + c > b)
+  );
 }
 
 /**
@@ -131,38 +116,30 @@ function isIsoscelesTriangle(a, b, c) {
  *  26  => XXVI
  */
 function convertToRomanNumerals(num) {
-  if (num < 1 || num > 39) {
-    throw new RangeError('Number must be between 1 and 39');
-  }
-
+  const romans = [
+    'M',
+    'CM',
+    'D',
+    'CD',
+    'C',
+    'XC',
+    'L',
+    'XL',
+    'X',
+    'IX',
+    'V',
+    'IV',
+    'I',
+  ];
+  const divisors = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+  let mod = num;
   let roman = '';
-  let n = num;
-
-  while (n >= 10) {
-    roman += 'X';
-    n -= 10;
+  for (let i = 0; i < divisors.length; i += 1) {
+    while (mod >= divisors[i]) {
+      roman += romans[i];
+      mod -= divisors[i];
+    }
   }
-
-  if (n === 9) {
-    roman += 'IX';
-    n -= 9;
-  }
-
-  if (n >= 5) {
-    roman += 'V';
-    n -= 5;
-  }
-
-  if (n === 4) {
-    roman += 'IV';
-    n -= 4;
-  }
-
-  while (n >= 1) {
-    roman += 'I';
-    n -= 1;
-  }
-
   return roman;
 }
 
@@ -198,24 +175,15 @@ function convertNumberToString(numberStr) {
     ',': 'point',
   };
 
-  let result = '';
-  let i = 0;
-
-  while (i < numberStr.length) {
-    const char = numberStr[i];
-
-    if (digitToWord[char] !== undefined) {
-      if (result.length > 0) {
-        result += ' ';
-      }
-      result += digitToWord[char];
-    } else {
-      throw new Error(`Unsupported character: ${char}`);
-    }
-
-    i += 1;
+  function convertToWord(char) {
+    return digitToWord[char] || char; // If the character is not in digitToWord, return it as is
   }
 
+  let result = '';
+  for (let i = 0; i < numberStr.length; i += 1) {
+    result +=
+      convertToWord(numberStr[i]) + (i < numberStr.length - 1 ? ' ' : ''); // Add space between words
+  }
   return result;
 }
 
@@ -233,17 +201,11 @@ function convertNumberToString(numberStr) {
  */
 
 function isPalindrome(str) {
-  let start = 0;
-  let end = str.length - 1;
-
-  while (start < end) {
-    if (str[start] !== str[end]) {
+  for (let i = 0; i < str.length; i += 1) {
+    if (str[i] !== str[str.length - 1 - i]) {
       return false;
     }
-    start += 1;
-    end -= 1;
   }
-
   return true;
 }
 
@@ -509,23 +471,24 @@ function sortByAsc(arr) {
  *  'qwerty', 3 => 'qetwry' => 'qtrewy' => 'qrwtey'
  */
 function shuffleChar(str, iterations) {
-  let result = str; // Create a new variable 'result' to store the modified string
-
-  for (let i = 0; i < iterations; i += 1) {
-    let evenChars = '';
-    let oddChars = '';
-
-    for (let j = 0; j < result.length; j += 1) {
+  if (!str || !iterations || iterations < 1) {
+    return str;
+  }
+  const { length } = str;
+  let result = str;
+  for (let i = 1; i <= iterations; i += 1) {
+    let left = '';
+    let right = '';
+    for (let j = 0; j < length; j += 1) {
       if (j % 2 === 0) {
-        evenChars += result[j];
+        left += result[j];
       } else {
-        oddChars += result[j];
+        right += result[j];
       }
     }
-
-    result = evenChars + oddChars; // Use 'result' instead of 'str'
+    result = left + right;
+    if (result === str) return shuffleChar(str, iterations % i);
   }
-
   return result;
 }
 
