@@ -248,19 +248,13 @@ function getIndexOf(str, letter) {
  *  12345, 6    => false
  */
 function isContainNumber(num, digit) {
-  if (digit < 0 || digit > 9) {
-    return false;
-  }
-
-  let n = Math.abs(num); // Create a new variable 'n' to avoid modifying 'num'
-
-  while (n > 0) {
-    if (n % 10 === digit) {
+  let temp = num;
+  while (temp > 0) {
+    if (temp % 10 === digit) {
       return true;
     }
-    n = Math.floor(n / 10); // Modify 'n' instead of 'num'
+    temp = Math.round(temp / 10);
   }
-
   return false;
 }
 
@@ -278,25 +272,18 @@ function isContainNumber(num, digit) {
  *  [1, 2, 3, 4, 5] => -1   => no balance element
  */
 function getBalanceIndex(arr) {
-  const n = arr.length;
-  if (n === 0) return -1;
-
-  let totalSum = 0;
-  let leftSum = 0;
-
-  for (let i = 0; i < n; i += 1) {
-    totalSum += arr[i];
+  let total = 0;
+  let left = 0;
+  for (let i = 0; i < arr.length; i += 1) {
+    total += arr[i];
   }
-
-  for (let i = 0; i < n; i += 1) {
-    const rightSum = totalSum - leftSum - arr[i];
-    if (leftSum === rightSum) {
+  for (let i = 0; i < arr.length; i += 1) {
+    const right = total - arr[i] - left;
+    if (left === right) {
       return i;
     }
-
-    leftSum += arr[i];
+    left += arr[i];
   }
-
   return -1;
 }
 
@@ -389,30 +376,23 @@ function getSpiralMatrix(size) {
  */
 function rotateMatrix(matrix) {
   const n = matrix.length;
-
-  const newMatrix = matrix.map((row) => row.slice());
+  const initialMatrix = matrix;
+  const rotatedMatrix = [];
 
   for (let i = 0; i < n; i += 1) {
-    for (let j = i + 1; j < n; j += 1) {
-      const temp = newMatrix[i][j];
-      newMatrix[i][j] = newMatrix[j][i];
-      newMatrix[j][i] = temp;
+    rotatedMatrix[i] = [];
+    for (let j = 0; j < n; j += 1) {
+      rotatedMatrix[i][j] = matrix[n - 1 - j][i];
     }
   }
 
   for (let i = 0; i < n; i += 1) {
-    let left = 0;
-    let right = n - 1;
-    while (left < right) {
-      const temp = newMatrix[i][left];
-      newMatrix[i][left] = newMatrix[i][right];
-      newMatrix[i][right] = temp;
-      left += 1;
-      right -= 1;
+    for (let j = 0; j < n; j += 1) {
+      initialMatrix[i][j] = rotatedMatrix[i][j];
     }
   }
 
-  return newMatrix;
+  return initialMatrix;
 }
 
 /**
